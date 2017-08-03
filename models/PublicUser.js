@@ -2,8 +2,6 @@
  * Created by wse15 on 3/08/17.
  */
 
-const sequelize = require('sequelize');
-
 // PublicUser{
 //     id	integer
 //     username	string
@@ -11,16 +9,19 @@ const sequelize = require('sequelize');
 //     email	string
 // }
 
-const PublicUser = sequelize.define('PublicUser', {
+module.exports = (sequelize, DataTypes) => {
+    'use strict';
+  const PublicUser = sequelize.define('PublicUser', {
     id: {
-        type: sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+      type: DataTypes.INTEGER,
+      primaryKey: true,
     },
-    username: sequelize.STRING,
-    location: sequelize.STRING,
-    email: sequelize.STRING
-});
+    username: DataTypes.STRING,
+    location: DataTypes.STRING,
+    email: DataTypes.STRING
+  });
 
-module.exports = PublicUser;
+  return PublicUser;
+};
+
 
