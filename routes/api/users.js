@@ -5,7 +5,8 @@ const auth = require('../auth');
 const jwt = require('jsonwebtoken');
 
 const PublicUser = {
-  insert: (user) => models.PublicUser.create(user)
+  insert: (user) => models.PublicUser.create(user),
+  get: (id) => models.PublicUser.findById(id)
 };
 
 const User = {
@@ -13,17 +14,37 @@ const User = {
     id: id,
     password: password
   }),
+  get: (id) => models.User.findById(id)
 };
 
 
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
   'use strict';
-  const b = req.body;
-  PublicUser.insert(b.user)
-    .then(() => User.insert(b.user.id, b.password))
-    .then(() => res.status(200).json(b.user.id))
-    .catch((ex) => res.status(500).json(ex));
-})
+  try {
+    const b = req.body;
+    await PublicUser.insert(b.user);
+    await User.insert(b.user.id, b.password);
+    return res.sendStatus(200).json(b.user.id);
+  } catch (ex) {
+    return res.sendStatus(500).json(ex);
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  const id = req.params.id;
+  const user = await PublicUser.get(id);
+  return res.json(user);
+});
+
+router.put('/', auth.required, async (req, res, next) => {
+  // const user = await PublicUser.get(req.payload.id);
+  // if (!user) {
+  //   return res.sendStatus(401);
+  // }
+  //
+  // return res.json(user);
+});
+
 
 router.post('/login', (req, res, next) => {
   'use strict';
