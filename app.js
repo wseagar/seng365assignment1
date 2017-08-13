@@ -7,6 +7,8 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 
 const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const db = require('./models');
@@ -34,6 +36,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
     console.log(err.stack);
+
     res.status(err.status || 500);
     res.json({'errors' : {
         message: err.message,

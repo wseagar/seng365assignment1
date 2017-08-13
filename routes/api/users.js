@@ -4,65 +4,145 @@ const passport = require('passport');
 const auth = require('../auth');
 const jwt = require('jsonwebtoken');
 
-const PublicUser = {
-  insert: (user) => models.PublicUser.create(user),
-  get: (id) => models.PublicUser.findById(id)
-};
-
-const User = {
-  insert: (id, password) => models.User.create({
-    id: id,
-    password: password
-  }),
-  get: (id) => models.User.findById(id)
-};
-
 
 router.post('/', async (req, res, next) => {
   'use strict';
   try {
     const b = req.body;
-    await PublicUser.insert(b.user);
-    await User.insert(b.user.id, b.password);
-    return res.sendStatus(200).json(b.user.id);
+
+    const newUser = models.User.build({
+      id: b.user.id,
+      username: b.user.username,
+      location: b.user.location,
+      email: b.user.email,
+      password: b.password
+    });
+
+    await newUser.save();
+
+    return res.status(200).json(newUser.id);
   } catch (ex) {
-    return res.sendStatus(500).json(ex);
+    return res.status(500).json(ex);
   }
 });
 
 router.get('/:id', async (req, res) => {
-  const id = req.params.id;
-  const user = await PublicUser.get(id);
-  return res.json(user);
+  try {
+    const id = parseInt(req.params.id, 10);
+
+    if (isNaN(id)){
+      return res.status(400).send('Invalid id supplied');
+    }
+
+    const user = await models.User.findById(id);
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    return res.json(user.toPublicUserJson());
+  } catch (ex) {
+    return res.status(500).json(ex);
+  }
+
 });
 
-router.put('/', auth.required, async (req, res, next) => {
-  // const user = await PublicUser.get(req.payload.id);
-  // if (!user) {
-  //   return res.sendStatus(401);
-  // }
-  //
-  // return res.json(user);
+router.put('/:id', auth.required, async (req, res, next) => {
+  try {
+    if (!req.payload) {
+      return res.status(401).send('Unauthorized - not Logged in')
+    }
+
+    const b = req.body;
+    const id = parseInt(req.params.id, 10);
+
+    if (id !== req.payload.id){
+      return res.status(403).send('Forbidden - account not owned');
+    }
+
+    if (isNaN(id)){
+      return res.status(400).send('Invalid id supplied');
+    }
+
+    const user = await models.User.findById(id);
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    user.username = b.user.username;
+    user.location = b.user.location;
+    user.email = b.user.email;
+    user.password = b.password;
+
+    user.save();
+
+    return res.status(200).json(user);
+  } catch (ex) {
+    return res.status(500).json(ex);
+  }
+});
+
+router.delete('/:id', auth.required, async (req, res, next) => {
+  try {
+    if (!req.payload) {
+      return res.status(401).send('Unauthorized - not Logged in')
+    }
+
+    const b = req.body;
+    const id = parseInt(req.params.id, 10);
+
+    if (id !== req.payload.id) {
+      return res.status(403).send('Forbidden - account not owned');
+    }
+
+    if (isNaN(id)) {
+      return res.status(400).send('Invalid id supplied');
+    }
+
+    const user = await models.User.findById(id);
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    models.User.destroy({
+      where: {
+        id : req.params.id
+      },
+    });
+
+    return res.status(200).send('User deleted');
+  } catch (ex) {
+    return res.status(500).json(ex);
+  }
 });
 
 
 router.post('/login', (req, res, next) => {
   'use strict';
-  passport.authenticate('local', (err, localUser, info) => {
+  passport.authenticate('local', (err, user, info) => {
     if (err) { return next(err); }
 
-    if (localUser) {
-      const token = jwt.sign({
-        id: localUser.id,
-        email: localUser.email
-      }, "test");
-      return res.json({
-        id: localUser.id,
-        token: token
-      });
+    if (!user) { return res.status(400).send('Invalid username/password supplied'); }
 
-    }
+    const token = jwt.sign({
+      id: user.id,
+    }, "test");
+
+    return res.json({
+      id: user.id,
+      token: token
+    });
   })(req, res, next);
+});
+
+router.post('/logout', auth.required, (req, res) => {
+  'use strict';
+  if (!req.payload) {
+    return res.status(401).send('Unauthorized - already logged out');
+  }
+
 });
 
 

@@ -8,12 +8,35 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       primaryKey: true,
     },
+    username: DataTypes.STRING,
+    location: DataTypes.STRING,
+    email: DataTypes.STRING,
     password: DataTypes.STRING
+  },
+  {
+    timestamps: false
   });
 
-  User.associate = (models) => {
-    User.belongsTo(models.PublicUser, { foreignKey: 'id', targetKey: 'id' });
-  };
+  User.prototype.toUserJson = function toUserJson() {
+    return {
+      user: {
+        id : this.id,
+        username: this.username,
+        location: this.location,
+        email: this.email
+      },
+      password: this.password
+    };
+  }
+
+  User.prototype.toPublicUserJson = function toPublicUserJson() {
+    return {
+      id : this.id,
+      username: this.username,
+      location: this.location,
+      email: this.email
+    };
+  }
 
   return User;
 };
