@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     id: {
       type: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true,
     },
     username: DataTypes.STRING,
@@ -17,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   });
 
+  User.associate = function (models) {
+    User.hasMany(models.Creator);
+    User.hasMany(models.Backer);
+  };
+
   User.prototype.toUserJson = function toUserJson() {
     return {
       user: {
@@ -27,7 +33,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: this.password
     };
-  }
+  };
+
+
 
   User.prototype.toPublicUserJson = function toPublicUserJson() {
     return {
@@ -36,7 +44,6 @@ module.exports = (sequelize, DataTypes) => {
       location: this.location,
       email: this.email
     };
-  }
-
+  };
   return User;
 };

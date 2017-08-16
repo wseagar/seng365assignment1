@@ -2,16 +2,16 @@ const router = require('express').Router();
 const models = require('../../models');
 const passport = require('passport');
 const auth = require('../auth');
+const middleware = require('../middleware');
 const jwt = require('jsonwebtoken');
 
 
-router.post('/', async (req, res, next) => {
+router.post('/', middleware.checkUserPost, async (req, res, next) => {
   'use strict';
   try {
-    const b = req.body;
+    const b = res.locals.b;
 
     const newUser = models.User.build({
-      id: b.user.id,
       username: b.user.username,
       location: b.user.location,
       email: b.user.email,
@@ -26,20 +26,9 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', middleware.checkUserId, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-
-    if (isNaN(id)){
-      return res.status(400).send('Invalid id supplied');
-    }
-
-    const user = await models.User.findById(id);
-
-    if (!user) {
-      return res.status(404).send('User not found');
-    }
-
+    const user = res.locals.user;
     return res.json(user.toPublicUserJson());
   } catch (ex) {
     return res.status(500).json(ex);
@@ -47,68 +36,43 @@ router.get('/:id', async (req, res) => {
 
 });
 
-router.put('/:id', auth.required, async (req, res, next) => {
+router.put('/:id', auth.required, middleware.putCheckUserId, middleware.checkUserPut, async (req, res, next) => {
   try {
-    if (!req.payload) {
-      return res.status(401).send('Unauthorized - not Logged in')
-    }
+    const checkAuthErrorMsg = 'Unauthorized - not Logged in';
+    const checkIfAccountOwnedErrorMsg = 'Forbidden - account not owned';
 
-    const b = req.body;
-    const id = parseInt(req.params.id, 10);
+    const b = res.locals.b;
+    const userId = res.locals.id;
+    const user = res.locals.user;
 
-    if (id !== req.payload.id){
-      return res.status(403).send('Forbidden - account not owned');
-    }
-
-    if (isNaN(id)){
-      return res.status(400).send('Invalid id supplied');
-    }
-
-    const user = await models.User.findById(id);
-
-    if (!user) {
-      return res.status(404).send('User not found');
-    }
+    auth.checkAuth(req, res, checkAuthErrorMsg);
+    auth.checkIfItemOwned(req, res, userId, checkIfAccountOwnedErrorMsg);
 
     user.username = b.user.username;
     user.location = b.user.location;
     user.email = b.user.email;
     user.password = b.password;
-
     user.save();
 
-    return res.status(200).json(user);
+    return res.sendStatus(200);
   } catch (ex) {
     return res.status(500).json(ex);
   }
 });
 
-router.delete('/:id', auth.required, async (req, res, next) => {
+router.delete('/:id', auth.required, middleware.checkUserId, async (req, res, next) => {
   try {
-    if (!req.payload) {
-      return res.status(401).send('Unauthorized - not Logged in')
-    }
+    const checkAuthErrorMsg = 'Unauthorized - not Logged in';
+    const checkIfAccountOwnedErrorMsg = 'Forbidden - account not owned';
 
-    const b = req.body;
-    const id = parseInt(req.params.id, 10);
+    const userId = res.locals.id;
 
-    if (id !== req.payload.id) {
-      return res.status(403).send('Forbidden - account not owned');
-    }
-
-    if (isNaN(id)) {
-      return res.status(400).send('Invalid id supplied');
-    }
-
-    const user = await models.User.findById(id);
-
-    if (!user) {
-      return res.status(404).send('User not found');
-    }
+    auth.checkAuth(req, res, checkAuthErrorMsg);
+    auth.checkIfItemOwned(req, res, userId, checkIfAccountOwnedErrorMsg);
 
     models.User.destroy({
       where: {
-        id : req.params.id
+        id : userId
       },
     });
 
@@ -139,9 +103,8 @@ router.post('/login', (req, res, next) => {
 
 router.post('/logout', auth.required, (req, res) => {
   'use strict';
-  if (!req.payload) {
-    return res.status(401).send('Unauthorized - already logged out');
-  }
+  const checkAuthErrorMsg = 'Unauthorized - already logged out';
+  auth.checkAuth(req, res, checkAuthErrorMsg);
 
 });
 
