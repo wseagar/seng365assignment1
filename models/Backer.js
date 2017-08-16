@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     name: DataTypes.STRING,
     amount: DataTypes.INTEGER,
+    anonymous: DataTypes.BOOLEAN,
   },
   {
     timestamps: false

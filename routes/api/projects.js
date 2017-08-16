@@ -34,7 +34,8 @@ router.get('/:id', middleware.checkProjectId, async(req, res, next) => {
   });
   const backers = await models.Backer.findAll({
     where: {
-      ProjectId: id
+      ProjectId: id,
+      anonymous: false
     }
   });
 
@@ -44,7 +45,7 @@ router.get('/:id', middleware.checkProjectId, async(req, res, next) => {
 
   const mappedRewards = rewards.map(x => { return {"id": x.id, "amount": x.amount, "description": x.description} } );
   const mappedCreators = creators.map(x => { return {"id": x.UserId, "name": x.name} } );
-  const mappedBackers = backers.map(x => { return {"name": x.name, "amount": x.amount }});
+  const mappedBackers = backers.map(x => { return {"name": x.UserId, "amount": x.amount }});
 
   const response = {
     "project" : {
@@ -174,8 +175,49 @@ router.put('/:id/image', auth.required, middleware.checkProjectId, async (req, r
   if (!isOwner){
     return res.status(403).send('Forbidden - unable to update a project you do not own');
   }
+});
 
+router.post(':id/pledge', auth.required, middleware.checkPledge, async (req, res, next) =>{
+  'use strict';
+  const checkAuthErrorMsg = 'Unauthorized - create account to pledge to a project';
+  auth.checkAuth(req, res, checkAuthErrorMsg);
 
+  const id = res.locals.projectId;
+  const project = res.locals.project;
+
+  const creators = await models.Creator.findAll({
+    where: {
+      ProjectId: id,
+      UserId: req.payload.id,
+    }
+  });
+
+  if (creators.length === 0){
+    return res.status(403).send('Forbidden - cannot pledge to own project - this is fraud!');
+  }
+
+  const backer = models.Backer.create({
+    UserId: req.payload.id,
+    ProjectId: id,
+    amount: b.amount,
+    anonymous: b.anonymous
+  });
+
+  await backer.save();
+
+  return res.sendStatus(200);
+});
+
+router.get('/:id/rewards', middleware.checkProjectId, (req, res, next) => {
+  'use strict';
+  const id = res.locals.projectId;
+  const rewards = models.Reward.findAll({
+    where: {
+      ProjectId: id
+    }
+  });
+
+  return res.status(200).json(rewards);
 });
 
 module.exports = router;

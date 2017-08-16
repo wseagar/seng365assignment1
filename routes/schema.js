@@ -143,6 +143,43 @@ const schema = {
       "open"
     ],
     "type": "object"
+  }, projectPledge : {
+    "additionalProperties": false,
+    "properties": {
+      "amount": {
+        "id": "/properties/amount",
+        "type": "integer"
+      },
+      "anonymous": {
+        "id": "/properties/anonymous",
+        "type": "boolean"
+      },
+      "card": {
+        "additionalProperties": false,
+        "id": "/properties/card",
+        "properties": {
+          "authToken": {
+            "id": "/properties/card/properties/authToken",
+            "type": "string"
+          }
+        },
+        "required": [
+          "authToken"
+        ],
+        "type": "object"
+      },
+      "id": {
+        "id": "/properties/id",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "card",
+      "amount",
+      "id",
+      "anonymous"
+    ],
+    "type": "object"
   }
 };
 
