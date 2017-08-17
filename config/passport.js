@@ -18,6 +18,5 @@ passport.use(new LocalStrategy(
       } catch (e) {
         done();
       }
-    },
-    )
+    })
 );

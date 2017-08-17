@@ -33,7 +33,6 @@ router.get('/:id', middleware.checkUserId, async (req, res) => {
   } catch (ex) {
     return res.status(500).json(ex);
   }
-
 });
 
 router.put('/:id', auth.required, middleware.putCheckUserId, middleware.checkUserPut, async (req, res, next) => {

@@ -130,7 +130,7 @@ router.put('/:id', auth.required, middleware.checkProjectId, middleware.checkPro
     }
   });
 
-  if (creators.length == 0){
+  if (creators.length === 0){
     return res.status(403).send('Forbidden - unable to update a project you do not own');
   }
 

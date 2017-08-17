@@ -3,7 +3,7 @@
 const fs        = require("fs");
 const path      = require("path");
 const Sequelize = require("sequelize");
-const env       = "windowsDev";
+const env       = "linuxDev";
 const config    = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
 
 
@@ -26,17 +26,17 @@ Object.keys(db).forEach(function(modelName) {
   }
 });
 
-sequelize.query('CREATE OR REPLACE VIEW progress as \n' +
-                'SELECT P.ID as id, P.TARGET as target, COALESCE(SUM(B.AMOUNT), 0) AS currentPledged, COUNT(B.ID) AS numberOfBackers\n' +
-                'FROM PROJECTS P LEFT JOIN BACKERS B ON P.ID = B.PROJECTID\n' +
-                'GROUP BY P.ID, P.TARGET')
-
 sequelize.sync({force: true})
     .then(() => {
   console.log("Tables Created");
 }).catch(error => {
   throw error;
 });
+
+sequelize.query('CREATE OR REPLACE VIEW progress as \n' +
+    'SELECT P.ID as id, P.TARGET as target, COALESCE(SUM(B.AMOUNT), 0) AS currentPledged, COUNT(B.ID) AS numberOfBackers\n' +
+    'FROM PROJECTS P LEFT JOIN BACKERS B ON P.ID = B.PROJECTID\n' +
+    'GROUP BY P.ID, P.TARGET');
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
