@@ -5,6 +5,10 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.INTEGER,
           primaryKey: true,
         },
+        projectId: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+        },
         description: DataTypes.STRING,
         amount: DataTypes.INTEGER,
       },

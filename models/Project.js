@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
   Project.associate = function (models) {
     Project.hasMany(models.Creator);
     Project.hasMany(models.Backer);
-    Project.hasMany(models.Reward);
+    Project.hasMany(models.Reward, {foreignKey: 'projectId'});
   };
 
   return Project;

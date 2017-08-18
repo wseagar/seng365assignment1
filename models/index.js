@@ -3,7 +3,7 @@
 const fs        = require("fs");
 const path      = require("path");
 const Sequelize = require("sequelize");
-const env       = "linuxDev";
+const env       = "windowsDev";
 const config    = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
 
 

@@ -2,6 +2,8 @@ const router = require('express').Router();
 const models = require('../../models');
 const middleware = require('../middleware');
 const auth = require('../auth');
+const upload = require('../../config/multer');
+const path = require('path');
 
 router.get('/', async (req, res, next) => {
   'use strict';
@@ -98,9 +100,9 @@ router.post('/', auth.required, middleware.checkProjectPost, async (req, res, ne
     for (let reward of b.rewards) {
       const newReward = models.Reward.build({
         id: reward.id,
+        projectId: newProject.id,
         description: reward.description,
         amount: reward.amount,
-        ProjectId: newProject.id
       });
       newObjects.push(newReward);
     }
@@ -146,7 +148,9 @@ router.get('/:id/image', middleware.checkProjectId, async (req, res, next) => {
     return res.status(404).send('Not found');
   }
 
-  return res.status(200).send(project.imageUri);
+  const filePath = path.resolve(project.imageUri);
+
+  return res.sendFile(filePath);
 });
 
 router.put('/:id/image', auth.required, middleware.checkProjectId, async (req, res, next) => {
@@ -159,22 +163,23 @@ router.put('/:id/image', auth.required, middleware.checkProjectId, async (req, r
 
   const creators = await models.Creator.findAll({
     where: {
-      ProjectId: id
+      ProjectId: id,
+      UserId: req.payload.id,
     }
   });
 
-  let isOwner = false;
-
-  for (let creator of creators) {
-    if (req.payload.id === creator.id){
-      isOwner = true;
-      break;
-    }
-  }
-
-  if (!isOwner){
+  if (creators.length === 0){
     return res.status(403).send('Forbidden - unable to update a project you do not own');
   }
+
+  upload(req, res, async function(err) {
+    if (err || !req.file) {
+      return res.status(400).send('Malformed request');
+    }
+    project.imageUri = req.file.path;
+    await project.save();
+    return res.sendStatus(201);
+  });
 });
 
 router.post(':id/pledge', auth.required, middleware.checkPledge, async (req, res, next) =>{
