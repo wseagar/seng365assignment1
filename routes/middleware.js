@@ -70,13 +70,9 @@ const middleware = {
       if (!user) { return res.status(400).send('Malformed project data'); }
     }
 
-    for (let reward of b.rewards) {
-      const rw = await models.Reward.findById(reward.id);
-      if (rw) { return res.status(400).send('Malformed project data'); }
-    }
-
     res.locals.b = b;
     next();
+
   }, checkProjectPut : async (req, res, next) => {
     'use strict';
     const b = req.body;
@@ -85,6 +81,7 @@ const middleware = {
     }
     res.locals.b = b;
     next();
+
   }, checkPledge: async (req, res, next) => {
     'use strict';
     const id = parseInt(req.params.id, 10);
