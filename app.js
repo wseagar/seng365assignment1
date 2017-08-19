@@ -7,10 +7,6 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
-//const port = process.env.SENG365_PORT || 3001;
-
-//SENG365_PORT = 4926
-
 app.get('/', (req, res) => {
     res.send("Hello world");
 });
