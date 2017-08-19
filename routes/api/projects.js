@@ -7,8 +7,8 @@ const path = require('path');
 
 router.get('/', async (req, res, next) => {
   'use strict';
-  const offset = req.body.startIndex | 0;
-  const limit = req.body.count | 0;
+  const offset = req.query.startIndex | 0;
+  const limit = req.query.count | 0;
 
   const projects = await models.Project.findAll({
     limit: limit,
