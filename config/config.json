@@ -1,0 +1,24 @@
+{
+  "linuxDev" : {
+    "host": "localhost",
+    "port": "6033",
+    "dialect": "mysql",
+    "username": "root",
+    "password": "secret",
+    "database": "seng365"
+  },
+  "windowsDev" : {
+    "host": "localhost",
+    "port": "3306",
+    "dialect": "mysql",
+    "username": "root",
+    "password": "root",
+    "database": "sengdev"
+  },
+  "production": {
+    "dialect": "mysql",
+    "username": "root",
+    "password": "secret",
+    "database": "mysql"
+  }
+}
