@@ -91,6 +91,7 @@ router.post('/login', (req, res, next) => {
 
     const token = jwt.sign({
       id: user.id,
+      jti: Math.random().toString(36).slice(2)
     }, "test");
 
     return res.json({
@@ -105,6 +106,9 @@ router.post('/logout', auth.required, (req, res) => {
   const checkAuthErrorMsg = 'Unauthorized - already logged out';
   auth.checkAuth(req, res, checkAuthErrorMsg);
 
+  auth.addToBlacklist(req.payload.jti);
+
+  return res.sendStatus(200);
 });
 
 

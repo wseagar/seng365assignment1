@@ -52,7 +52,7 @@ router.get('/:id', middleware.checkProjectId, async(req, res, next) => {
   const response = {
     "project" : {
       "id": project.id,
-      "creationDate": project.creationDate,
+      "creationDate": project.creationDate.getTime(),
       "data": {
         "title": project.title,
         "subtitle": project.subtitle,

@@ -13,14 +13,31 @@ app.use(bodyParser.json());
 
 const db = require('./models');
 
-db.sequelize
-  .authenticate()
-  .then(() => {
-    console.log('Connection has been established successfully.');
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err);
-  });
+const tryConnect = async () => {
+  'use strict';
+  try {
+    await db.sequelize.authenticate();
+    return true;
+  } catch (ex) {
+    setTimeout(1000);
+    return await tryConnect();
+  }
+};
+
+
+
+let connected = false;
+
+tryConnect().then(res => {
+  'use strict';
+  if (res === true) { return }
+
+});
+
+while (!connected) {
+  setTimeout(1000);
+  connected = Promise.resolve(tryConnect());
+}
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -44,6 +61,6 @@ app.use((err, req, res, next) => {
     }});
 });
 
-const server = app.listen(3001, () => {
+const server = app.listen(4941, () => {
     console.log("Example app listening on port " + server.address().port);
 });

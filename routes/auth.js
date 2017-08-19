@@ -1,6 +1,8 @@
 const jwt = require('express-jwt');
 const secret = "test";
 
+const tokenBlacklist = [];
+
 function getTokenFromHeader(req){
   if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Token' ||
       req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
@@ -10,12 +12,26 @@ function getTokenFromHeader(req){
   return null;
 }
 
+const isRevokedCallback = function (req, payload, done) {
+  'use strict';
+  const tokenId = payload.jti;
+
+  for (let revokedToken of tokenBlacklist) {
+    if (tokenId === revokedToken) {
+      return done(null, true);
+    }
+  }
+
+  return done(null, false);
+};
+
 const auth = {
   required: jwt({
     secret: secret,
     userProperty: 'payload',
     credentialsRequired: false,
-    getToken: getTokenFromHeader
+    getToken: getTokenFromHeader,
+    isRevoked: isRevokedCallback
   }),
   checkAuth: (req, res, errorMsg) => {
     'use strict';
@@ -28,6 +44,10 @@ const auth = {
     if (itemId !== req.payload.id){
       return res.status(403).send(errorMsg);
     }
+  },
+  addToBlacklist: (tokenId) => {
+    'use strict';
+    tokenBlacklist.push(tokenId);
   }
 };
 

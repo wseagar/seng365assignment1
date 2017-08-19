@@ -3,9 +3,19 @@
 const fs        = require("fs");
 const path      = require("path");
 const Sequelize = require("sequelize");
-const env       = "windowsDev";
+
+let env = "windowsDev";
+
+if (process.env.SENG365_MYSQL_HOST){
+  env = "production";
+}
+
 const config    = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
 
+if (env === "production"){
+  config['host'] = process.env.SENG365_MYSQL_HOST;
+  config['port'] = process.env.SENG365_MYSQL_PORT;
+}
 
 const sequelize = new Sequelize(config);
 const db        = {};
