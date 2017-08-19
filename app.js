@@ -13,31 +13,6 @@ app.use(bodyParser.json());
 
 const db = require('./models');
 
-const tryConnect = async () => {
-  'use strict';
-  try {
-    await db.sequelize.authenticate();
-    return true;
-  } catch (ex) {
-    setTimeout(1000);
-    return await tryConnect();
-  }
-};
-
-
-
-let connected = false;
-
-tryConnect().then(res => {
-  'use strict';
-  if (res === true) { return }
-
-});
-
-while (!connected) {
-  setTimeout(1000);
-  connected = Promise.resolve(tryConnect());
-}
 
 app.use(passport.initialize());
 app.use(passport.session());

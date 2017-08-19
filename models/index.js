@@ -4,7 +4,7 @@ const fs        = require("fs");
 const path      = require("path");
 const Sequelize = require("sequelize");
 
-let env = "windowsDev";
+let env = "linuxDev";
 
 if (process.env.SENG365_MYSQL_HOST){
   env = "production";
@@ -36,17 +36,31 @@ Object.keys(db).forEach(function(modelName) {
   }
 });
 
-sequelize.sync({force: true})
-    .then(() => {
-  console.log("Tables Created");
-}).catch(error => {
-  throw error;
-});
+const createView = () => {
+  sequelize.query('CREATE OR REPLACE VIEW progress as \n' +
+      'SELECT P.ID as id, P.TARGET as target, COALESCE(SUM(B.AMOUNT), 0) AS currentPledged, COUNT(B.ID) AS numberOfBackers\n' +
+      'FROM Projects P LEFT JOIN Backers' +
+      ' B ON P.ID = B.PROJECTID\n' +
+      'GROUP BY P.ID, P.TARGET');
+};
 
-sequelize.query('CREATE OR REPLACE VIEW progress as \n' +
-    'SELECT P.ID as id, P.TARGET as target, COALESCE(SUM(B.AMOUNT), 0) AS currentPledged, COUNT(B.ID) AS numberOfBackers\n' +
-    'FROM PROJECTS P LEFT JOIN BACKERS B ON P.ID = B.PROJECTID\n' +
-    'GROUP BY P.ID, P.TARGET');
+const connectAndBuildTables = function() {
+  console.log('Trying to connect to database');
+  return sequelize.authenticate()
+    .then(() => {
+      sequelize.sync({force: true})
+          .then(() => {
+            console.log("Tables Created");
+            createView();
+            console.log("View created");
+          })
+    }).catch(error => {
+      setTimeout(connectAndBuildTables, 5000);
+    })
+};
+
+connectAndBuildTables();
+
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
