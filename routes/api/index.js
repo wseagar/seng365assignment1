@@ -3,7 +3,6 @@
  */
 const router = require('express').Router();
 
-router.use('/', require('./test'));
 router.use('/users', require('./users'));
 router.use('/projects', require('./projects'));
 

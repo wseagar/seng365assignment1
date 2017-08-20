@@ -180,6 +180,34 @@ const schema = {
       "anonymous"
     ],
     "type": "object"
+  },
+  rewardsPut : {
+    "items": {
+      "additionalProperties": false,
+      "id": "/items",
+      "properties": {
+        "amount": {
+          "id": "/items/properties/amount",
+          "type": "integer"
+        },
+        "description": {
+          "id": "/items/properties/description",
+          "type": "string"
+        },
+        "id": {
+          "id": "/items/properties/id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "amount",
+        "id",
+        "description"
+      ],
+      "type": "object"
+    },
+    "type": "array",
+    "uniqueItems": true
   }
 };
 
