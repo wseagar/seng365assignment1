@@ -4,12 +4,14 @@
 
 const router = require('express').Router();
 const models = require('../../../models');
-const middleware = require('../../middleware');
 const auth = require('../../auth');
+const middleware = require('./middleware')
 const upload = require('../../../config/multer');
 const path = require('path');
 
-router.post('/', auth.required, middleware.checkProjectPost, async (req, res, next) => {
+
+
+router.post('/', auth.required, middleware.validateProject, async (req, res, next) => {
   'use strict';
   try {
     const checkAuthErrorMsg = 'Unauthorized - create account to create project';

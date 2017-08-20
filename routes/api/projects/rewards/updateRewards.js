@@ -4,12 +4,23 @@
 
 const router = require('express').Router();
 const models = require('../../../../models');
-const middleware = require('../../../middleware');
+const middleware = require('../middleware');
 const auth = require('../../../auth');
 const upload = require('../../../../config/multer');
 const path = require('path');
+const tv4 = require('tv4');
+const schema = require('../../../schema');
 
-router.put('/:id/rewards', auth.required, middleware.checkProjectId, middleware.checkRewardPut, async (req, res, next) => {
+const validateReward = async (req, res, next) => {
+  const b = req.body;
+  if (!tv4.validate(b, schema.rewardsPut)){
+    return res.status(400).send('Malformed request');
+  }
+
+  next();
+}
+
+router.put('/:id/rewards', auth.required, middleware.checkProjectId, validateReward, async (req, res, next) => {
   'use strict';
   const checkAuthErrorMsg = 'Unauthorized - create account to update project';
   auth.checkAuth(req, res, checkAuthErrorMsg);

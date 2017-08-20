@@ -3,9 +3,9 @@
  */
 const checkUserId = require('./checkUserId');
 
-const middleware = {
-  checkUserId,
 
+const middleware = {
+  checkUserId
 }
 
 module.exports = middleware;

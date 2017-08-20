@@ -4,7 +4,6 @@
 
 const router = require('express').Router();
 const models = require('../../../models');
-const auth = require('../../auth');
 const tv4 = require('tv4');
 const schema = require('../../schema');
 
@@ -12,6 +11,17 @@ const schema = require('../../schema');
 const validateUser = async (req, res, next) => {
   'use strict';
   const b = req.body;
+
+  const results = await models.User.findAll({
+    where: {
+      username: b.user.username
+    }
+  });
+
+  if (results.length !== 0) {
+    return res.status(400).send('Malformed request')
+  }
+
   if (!tv4.validate(b, schema.usersPost)){
     return res.status(400).send('Malformed request');
   }

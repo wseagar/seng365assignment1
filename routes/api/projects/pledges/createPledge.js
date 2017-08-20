@@ -9,15 +9,41 @@ const auth = require('../../../auth');
 const upload = require('../../../../config/multer');
 const path = require('path');
 
+const tv4 = require('tv4');
+const schema = require('../../../schema');
 
-router.post('/:id/pledge', auth.required, middleware.checkPledge, async (req, res, next) =>{
+const validatePledge = async (req, res, next) => {
+  'use strict';
+  const id = parseInt(req.params.id, 10);
+
+  if (isNaN(id)) {
+    return res.status(400).send('Bad user, project, or pledge details');
+  }
+
+  const project = await models.Project.findById(id);
+
+  if (!project) {
+    return res.status(404).send('Not found');
+  }
+
+  const b = req.body;
+  if (!tv4.validate(b, schema.projectPledge)) {
+    return res.status(400).send('Bad user, project, or pledge details');
+  }
+
+  res.locals.projectId = id;
+  res.locals.project = project;
+  next();
+};
+
+router.post('/:id/pledge', auth.required, validatePledge, async (req, res, next) =>{
   'use strict';
   const checkAuthErrorMsg = 'Unauthorized - create account to pledge to a project';
   auth.checkAuth(req, res, checkAuthErrorMsg);
 
   const id = res.locals.projectId;
   const project = res.locals.project;
-  const b = res.locals.b;
+  const b = req.body;
 
   const creators = await models.Creator.findAll({
     where: {
