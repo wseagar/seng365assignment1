@@ -4,9 +4,7 @@
 
 const router = require('express').Router();
 const models = require('../../../../models');
-const middleware = require('../../../middleware');
 const auth = require('../../../auth');
-const upload = require('../../../../config/multer');
 const path = require('path');
 
 const tv4 = require('tv4');
