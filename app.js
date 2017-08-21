@@ -37,5 +37,5 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(4941, () => {
-    console.log("Example app listening on port " + server.address().port);
+    console.log("Crowdfunding application listening on " + server.address().port);
 });
