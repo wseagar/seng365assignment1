@@ -15,7 +15,10 @@ router.post('/', auth.required, middleware.validateProject, async (req, res, nex
   'use strict';
   try {
     const checkAuthErrorMsg = 'Unauthorized - create account to create project';
-    auth.checkAuth(req, res, checkAuthErrorMsg);
+
+    if (!req.payload){
+      return res.status(401).send(checkAuthErrorMsg);
+    }
 
     const b = req.body;
     const newObjects = [];

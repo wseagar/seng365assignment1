@@ -4,7 +4,7 @@ const fs        = require("fs");
 const path      = require("path");
 const Sequelize = require("sequelize");
 
-let env = "windowsDev";
+let env = "linuxDev";
 
 if (process.env.SENG365_MYSQL_HOST){
   env = "production";

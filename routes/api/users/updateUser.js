@@ -34,8 +34,15 @@ router.put('/:id', auth.required, validateUser, checkUserId, async (req, res, ne
     const userId = res.locals.id;
     const user = res.locals.user;
 
-    auth.checkAuth(req, res, checkAuthErrorMsg);
-    auth.checkIfItemOwned(req, res, userId, checkIfAccountOwnedErrorMsg);
+
+    if (!req.payload){
+      return res.status(401).send(checkAuthErrorMsg);
+    }
+
+    if (userId !== req.payload.id){
+      return res.status(403).end(checkIfAccountOwnedErrorMsg);
+    }
+
 
     user.username = b.user.username;
     user.location = b.user.location;

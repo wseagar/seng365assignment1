@@ -37,7 +37,9 @@ const validatePledge = async (req, res, next) => {
 router.post('/:id/pledge', auth.required, validatePledge, async (req, res, next) =>{
   'use strict';
   const checkAuthErrorMsg = 'Unauthorized - create account to pledge to a project';
-  auth.checkAuth(req, res, checkAuthErrorMsg);
+  if (!req.payload){
+    return res.status(401).send(checkAuthErrorMsg);
+  }
 
   const id = res.locals.projectId;
   const project = res.locals.project;

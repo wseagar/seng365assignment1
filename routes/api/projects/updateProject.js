@@ -22,7 +22,10 @@ const validateUpdateProject = async (req, res, next) => {
 router.put('/:id', auth.required, middleware.checkProjectId, validateUpdateProject, async (req, res, next) => {
   'use strict';
   const checkAuthErrorMsg = 'Unauthorized - create account to update project';
-  auth.checkAuth(req, res, checkAuthErrorMsg);
+
+  if (!req.payload){
+    return res.status(401).send(checkAuthErrorMsg);
+  }
 
   const id = res.locals.projectId;
   const project = res.locals.project;

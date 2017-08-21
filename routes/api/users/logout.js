@@ -10,7 +10,9 @@ const auth = require('../../auth');
 router.post('/logout', auth.required, (req, res) => {
   'use strict';
   const checkAuthErrorMsg = 'Unauthorized - already logged out';
-  auth.checkAuth(req, res, checkAuthErrorMsg);
+  if (!req.payload){
+    return res.status(401).send(checkAuthErrorMsg);
+  }
 
   auth.addToBlacklist(req.payload.jti);
 

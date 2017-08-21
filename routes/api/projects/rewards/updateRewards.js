@@ -23,7 +23,9 @@ const validateReward = async (req, res, next) => {
 router.put('/:id/rewards', auth.required, middleware.checkProjectId, validateReward, async (req, res, next) => {
   'use strict';
   const checkAuthErrorMsg = 'Unauthorized - create account to update project';
-  auth.checkAuth(req, res, checkAuthErrorMsg);
+  if (!req.payload){
+    return res.status(401).send(checkAuthErrorMsg);
+  }
 
   const b = req.body;
 
