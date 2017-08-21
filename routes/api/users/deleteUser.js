@@ -14,8 +14,16 @@ router.delete('/:id', auth.required, middleware.checkUserId, async (req, res, ne
 
     const userId = res.locals.id;
 
-    auth.checkAuth(req, res, checkAuthErrorMsg);
-    auth.checkIfItemOwned(req, res, userId, checkIfAccountOwnedErrorMsg);
+    // auth.checkAuth(req, res, checkAuthErrorMsg);
+    // auth.checkIfItemOwned(req, res, userId, checkIfAccountOwnedErrorMsg);
+
+    if (!req.payload){
+      return res.status(401).send(checkAuthErrorMsg);
+    }
+
+    if (userId !== req.payload.id){
+      return res.status(403).send(checkIfAccountOwnedErrorMsg);
+    }
 
     models.User.destroy({
       where: {
